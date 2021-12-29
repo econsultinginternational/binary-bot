@@ -11,14 +11,14 @@ from iqoptionapi.stable_api import IQ_Option
 import pandas as pd
 
 
-def login(verbose = False, iq = None, checkConnection = False):
+def login(verbose = False, iq = None, checkConnection = False, accountType="PRACTICE"):
     
     if verbose:
         logging.basicConfig(level=logging.DEBUG,format='%(asctime)s %(message)s')
 
     if iq == None:
       print("Trying to connect to IqOption")
-      iq=IQ_Option('USERNAME','PASSWORD') # YOU HAVE TO ADD YOUR USERNAME AND PASSWORD
+      iq=IQ_Option('admin@econsultinginternational.com','#Moses19720$') # YOU HAVE TO ADD YOUR USERNAME AND PASSWORD
       iq.connect()
 
     if iq != None:
@@ -31,10 +31,11 @@ def login(verbose = False, iq = None, checkConnection = False):
         else:
           if not checkConnection:
             print('Successfully Connected!')
+            print(get_balance(iq))
           break
         time.sleep(3)
 
-    iq.change_balance("PRACTICE") #or real
+    iq.change_balance(accountType) #or real  ot PRACTICE
     return iq
 
 
@@ -46,7 +47,7 @@ def higher(iq,Money,Actives):
         print('Error call')
         print(done, id)
         exit(0)
-    
+    print('call id==',id)
     return id
 
 
@@ -58,7 +59,7 @@ def lower(iq,Money,Actives):
         print('Error put')
         print(done, id)
         exit(0)
-    
+    print('put id==',id)
     return id
   
 def get_candles(iq,Actives):

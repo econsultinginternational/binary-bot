@@ -22,8 +22,8 @@ except Exception as e:
   print(e)
 
 def preprocess_prediciton(iq):
-    Actives = ['EURUSD','GBPUSD','EURJPY','AUDUSD']
-    active = 'EURUSD'
+    Actives = ['EURUSD-OTC','EURUSD','GBPUSD','EURJPY','AUDUSD']
+    active = 'EURUSD-OTC'
     main = pd.DataFrame()
     current = pd.DataFrame()
     for active in Actives:
@@ -107,7 +107,7 @@ def preprocess_prediciton(iq):
 if(len(sys.argv) == 1):
     martingale = 2
     bet_money = 1
-    ratio = 'EURUSD'
+    ratio = 'EURUSD-OTC'
 elif(len(sys.argv) != 4):
     print("The correct pattern is: python testing.py EURUSD (or other currency) INITIAL_BET(value starting in 1$ MIN) MARTINGALE (your martingale ratio default = 2)")
     print("\n\nEXAMPLE:\npython testing.py EURUSD 1 3")
@@ -126,12 +126,14 @@ NAME = train_data() + '.model'
 model = tf.keras.models.load_model(f'models/{NAME}')
 
 iq = login()
-
+iq_practise = login()
+iq_real = login(verbose = False, iq = None, checkConnection = False, accountType="REAL")
 i = 0
 bid = True
 bets = []
 MONEY = 10000 
 trade = True
+result2=""
 
 
 while(1):
@@ -139,10 +141,11 @@ while(1):
         NAME = train_data() + '.model'
         model = tf.keras.models.load_model(f'models/{NAME}')
         i = 0
-    if datetime.datetime.now().second < 30 and i % 2 == 0: #GARANTE QUE ELE VAI APOSTAR NA SEGUNDA, POIS AQUI ELE JÁ PEGA OS DADOS DE UMA NA FRENTE,
+    if datetime.datetime.now().second < 30 and i % 2 == 0: #GUARANTEES THAT HE WILL BET ON MONDAY, BECAUSE HERE HE ALREADY TAKES THE DATA FROM A ONE IN FRONT,
         time_taker = time.time()
-        pred_ready = preprocess_prediciton(iq)             #LOGO, ELE PRECISA DE TEMPO PRA ELABORAR A PREVISÃO ANTES DE ATINGIR OS 59 SEGUNDOS PRA ELE
-        pred_ready = pred_ready.reshape(1,SEQ_LEN,pred_ready.shape[3])      #FAZER A APOSTA, ENÃO ELE VAI TENTAR PREVER O VALOR DA TERCEIRA NA FRENTE
+        print('this is result2=',result2)
+        pred_ready = preprocess_prediciton(iq)             #SOON, HE NEEDS TIME TO DESIGN THE FORECAST BEFORE REACHING 59 SECONDS FOR HIM
+        pred_ready = pred_ready.reshape(1,SEQ_LEN,pred_ready.shape[3])      #PLACE THE BET, THEN IT WILL TRY TO PREDICT THE VALUE OF THE THIRD ONE IN FRONT
         result = model.predict(pred_ready)
         print('probability of PUT: ',result[0][0])
         print('probability of CALL: ',result[0][1])
@@ -184,13 +187,16 @@ while(1):
             if win == ['win']:
                 #print(f'Balance : {get_balance(iq)}')
                 bet_money = 1
-                
-            elif win == ['lose']:
+                result2 = 'win'
+           
+            elif win == ['loose']:
+                result2 = 'loose'
                 #print(f'Balance : {get_balance(iq)}')
                 bet_money = bet_money * martingale # martingale V3
                 
+                
             else:
+                result2 = ''
                 #print(f'Balance : {get_balance(iq)}')
                 bets.append(0)
             #print(bet_money)
-            
